@@ -9,9 +9,9 @@ const post = (props) => {
 	const router = useRouter();
 	const [post, setPost] = useState(props.post);
 
-	// componentDidMount
+	// if `post` prop was empty!
 	useEffect(() => {
-		if (_.isEmpty(post)) {
+		if (_.isEmpty(props.post)) {
 			router.push("/");
 		}
 	}, []);
@@ -19,26 +19,15 @@ const post = (props) => {
 	return (
 		<main>
 			<div className="container mx-auto">
-				{_.isEmpty(post) && (
-					<h2 className="text-center">Post not found! returning to home page ...</h2>
-				)}
-				{!_.isEmpty(post) && (
-					<>
-						<div className="mb-5">
-							<img
-								src="https://picsum.photos/800/320"
-								alt="post image"
-								className="w-full rounded"
-							/>
-						</div>
-						<div className="mb-4">
-							<h2 className="text-3xl font-bold capitalize md:text-5xl">{post.title}</h2>
-						</div>
-						<div>
-							<p className="text-xl">{post.body}</p>
-						</div>
-					</>
-				)}
+				<div className="mb-5">
+					<img src="https://picsum.photos/800/320" alt="post image" className="w-full rounded" />
+				</div>
+				<div className="mb-4">
+					<h2 className="text-3xl font-bold capitalize md:text-5xl">{post.title}</h2>
+				</div>
+				<div>
+					<p className="text-xl">{post.body}</p>
+				</div>
 			</div>
 		</main>
 	);
@@ -46,8 +35,8 @@ const post = (props) => {
 
 export default post;
 
-export async function getServerSideProps(props) {
-	const postId = props.query.postId;
+export async function getServerSideProps(context) {
+	const postId = context.params.postId;
 	const numbersRegex = /^\d+$/;
 	let post = {};
 
@@ -66,6 +55,16 @@ export async function getServerSideProps(props) {
 		} catch (error) {
 			console.log("This error happend when we was trying to fetch post data :", error);
 		}
+	}
+
+	// if post was not available, redirect the user to the homepage!
+	if (_.isEmpty(post)) {
+		return {
+			redirect: {
+				destination: "/",
+				permanent: false,
+			},
+		};
 	}
 
 	return {
